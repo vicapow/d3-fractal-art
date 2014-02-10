@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <style>
+      body, html{
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+      rect{
+        fill: black;
+      }
+      tree{
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .controls{
+        top: 10px;
+        left: 10px;
+        position: absolute;
+      }
+      .share{
+        top: 10px;
+        right: 10px;
+        position: absolute;
+      }
+      .fb-like{
+        clear: both;
+        float: right;
+      }
+    </style>
+  </head>
+  <body ng-app="myApp" ng-controller="MainCtrl">
+    <div class="share">
+      <div class="twitter">
+        <a href="https://twitter.com/share" class="twitter-share-button" data-via="vicapow">Tweet</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+      </div>
+      <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div>
+    </div>
+    <tree n="n" r="r" m="m" levels="levels" thickness="thickness" opacity="opacity"></tree>
+    <div class="controls">
+      <input type="range" ng-model="n" min="10" value="100" max="300">
+      <input type="range" ng-model="m" min="1" max="7">
+      <input type="range" ng-model="r" min="1" max="360">
+      <input type="range" ng-model="levels" min="1" max="4">
+      <input type="range" ng-model="thickness" min="1" max="50">
+      <input type="range" ng-model="opacity" min="0" max="1" step="0.01">
+    </div>
+    <script src="d3.js" charset="utf-8"></script>
+    <script src="angular.js" charset="utf-8"></script>
+    <script>
+
+var app = angular.module('myApp', [])
+
+app.controller('MainCtrl', function($interval, $scope){
+    var params, found = false
+    try{
+      params = JSON.parse(decodeURIComponent(window.location.hash.replace(/^#/,'')))
+      found = true
+    }catch(e){}
+    console.log('params', params)
+    params = params || { n: 1, r: 1, m: 2, levels: 4, thickness: 10, opacity: 0.5}
+    console.log('params', params)
+
+    if(!found){
+      var prev_t = 0, total = 2000, rmax = 103, nmax = 100
+      d3.timer(function(t){
+        return $scope.$apply(function(){
+          var dt = t - prev_t
+          prev_t = t
+          if($scope.r < rmax) $scope.r += dt * 0.15
+          if($scope.n < nmax) $scope.n += dt * 0.15
+          if($scope.r >= rmax && $scope.n >= nmax) return true
+        })
+      })
+    }
+    Object.keys(params).forEach(function(prop){
+      $scope[prop] = +params[prop]
+    })
+    $scope.$watch('n * r * m * levels * thickness * opacity', function(){
+      window.location.hash = encodeURIComponent(JSON.stringify({
+          n: +$scope.n
+        , r: +$scope.r
+        , m: +$scope.m
+        , levels: +$scope.levels
+        , thickness: +$scope.thickness
+        , opacity: +$scope.opacity
+      }))
+    })
+})
+
+app.directive('tree', function($interval){
+  function link(scope, el, attr){
+    el = el[0]
+    var width = el.clientWidth, height = el.clientHeight
+    var svg = d3.select(el).append('svg').attr({width: width, height: height})
+    function nest(sel, n, r, m, levels, thickness, opacity){
+      if(levels <= 0) return
+      sel = sel
+        .selectAll('g').data(d3.range(m)).enter().append('g')
+        .attr('transform', function(d){
+          return 'rotate(' + (d / (m - 1) * r - r / 2) + ')'
+        }).call(function(g){ g.append('rect')
+          .attr({width: n, height: thickness, y: -thickness/2}) })
+          .style('opacity', opacity)
+        .append('g').attr('transform', 'translate(' + n + ',0)')
+      nest(sel, n, r, m, levels - 1, thickness, opacity)
+    }
+    scope.$watch('n * r * m * levels * thickness * opacity', function(){
+      var n = +scope.n , r = +scope.r, m = +scope.m, levels = +scope.levels
+        , thickness = +scope.thickness, opacity = +scope.opacity
+      svg.remove()
+      // console.log('n', n, 'r', r, 'm', m, 'levels', levels, 'thickness', thickness, 'opacity', opacity)
+      svg = d3.select(el).append('svg').attr({width: width, height: height})
+      var g = svg.append('g')
+        .attr('transform',
+          'translate(' + width / 2 + ',' + height / 2 + ') rotate(-90)')
+      nest(g, n, r, m, levels, thickness, opacity)
+    })
+  }
+  return {
+    link: link
+    , scope: { n: '=', r: '=', m: '=', levels: '=', thickness: '=', opacity: '='}
+    , restrict: 'E'
+  }
+})
+    </script>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=385171041519781";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-39250901-2', 'vctr.me');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
