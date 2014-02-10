@@ -14,33 +14,32 @@
       tree{
         width: 100%;
         height: 100%;
-        display: block;
+        position: absolute;
+        z-index: -1;
       }
       .controls{
-        top: 10px;
-        left: 10px;
-        position: absolute;
+        float: left;
+        z-index: 1;
+      }
+      .controls input{
+        display: block;
       }
       .share{
-        top: 10px;
-        right: 10px;
-        position: absolute;
-      }
-      .fb-like{
-        clear: both;
-        float: right;
+        float: left;
+        margin: 10px;
+        z-index: 0;
       }
     </style>
   </head>
   <body ng-app="myApp" ng-controller="MainCtrl">
+    <tree n="n" r="r" m="m" levels="levels" thickness="thickness" opacity="opacity"></tree>
     <div class="share">
       <div class="twitter">
         <a href="https://twitter.com/share" class="twitter-share-button" data-via="vicapow">Tweet</a>
         <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
       </div>
-      <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div>
+      <div class="fb-like" data-href="http://vicapow.github.io/d3-fractal-art/index.html" data-width="100px" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
     </div>
-    <tree n="n" r="r" m="m" levels="levels" thickness="thickness" opacity="opacity"></tree>
     <div class="controls">
       <input type="range" ng-model="n" min="10" value="100" max="300">
       <input type="range" ng-model="m" min="1" max="7">
@@ -128,6 +127,8 @@ app.directive('tree', function($interval){
   }
 })
     </script>
+
+
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -136,6 +137,8 @@ app.directive('tree', function($interval){
   js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=385171041519781";
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
